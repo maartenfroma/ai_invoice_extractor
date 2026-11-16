@@ -54,3 +54,30 @@ class DatabaseManager:
                 
                 # Rollback the transaction in case of an error
                 self.conn.rollback()
+                
+     
+     
+    # Method to insert a new invoice into the invoices table
+    def insert_invoice(self, leverancier, factuurnummer, 
+                       datum, totaal_ex_btw, btw_bedrag, totaal_inclusief):
+        try:
+            query = """
+                INSERT INTO invoices (leverancier, factuurnummer, 
+                datum, totaal_ex_btw, btw_bedrag, totaal_inclusief)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            with self.conn.cursor() as cursor:
+                
+                # Execute the query to insert the new invoice into 
+                # the invoices table
+                
+                cursor.execute(query, (leverancier, factuurnummer, datum, totaal_ex_btw, btw_bedrag, totaal_inclusief))
+            
+            # Commit the transaction to save the changes
+            self.conn.commit()
+            
+        except Exception as e:
+            logger.error(f"Failed to insert invoice: {e}")
+            
+            # Rollback the transaction in case of an error
+            self.conn.rollback()

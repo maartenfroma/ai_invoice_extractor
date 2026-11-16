@@ -16,8 +16,8 @@ services:
 
   web:
     build: .
-    image: ai_invoice_extractor
-    container_name: ai_invoice_extractor
+    image: factuuur_ai_piloot
+    container_name: factuuur_ai_piloot
     ports:
       - "8501:8501"
     restart: always
