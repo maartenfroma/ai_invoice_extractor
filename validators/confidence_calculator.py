@@ -10,8 +10,9 @@ logger = logging.getLogger(__name__)
 class ConfidenceCalculator:
     
     # Initialize the confidence calculator with the invoice data
-    def __init__(self, invoice: dict):
+    def __init__(self, invoice: dict, is_valid: bool):
         self.invoice = invoice
+        self.is_valid = is_valid
 
     def calculate_confidence(self) -> float:
         # Initialize confidence score
@@ -29,11 +30,15 @@ class ConfidenceCalculator:
             
             logger.debug(f"Checking presence of field: {field}")
             
-            #
+            # If the field is missing, decrease confidence by 10
             if not self.invoice.get(field):
                 confidence -= 10
 
-       
-        # Return the final confidence score
+        # Adjust confidence based on the validity of the invoice
+        # This means that if the invoice is not valid, 
+        # the confidence score is reduced by 25
+        
+        if not self.is_valid:
+            confidence -= 25
         
         return confidence 
