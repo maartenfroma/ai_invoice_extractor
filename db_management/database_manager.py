@@ -15,6 +15,8 @@ from custom_exceptions.db_exceptions import TableCreationException
 logger = logging.getLogger(__name__)
 
 from models.invoice import Invoice
+
+from config import DB_HOST, DB_NAME, DB_PORT, DB_USER, DB_PASSWORD
 # DatabaseManager class to handle database operations such as 
 # creating tables and managing connections
 
@@ -26,10 +28,11 @@ class DatabaseManager:
         
         # Initialize the database connection
         try:
-            self.conn = psycopg.connect(host="postgres",
-                                        dbname="invoices",
-                                        user="maart",
-                                        password="maart123")
+            self.conn = psycopg.connect(host=DB_HOST,
+                                        port=DB_PORT,
+                                        dbname=DB_NAME,
+                                        user=DB_USER,
+                                        password=DB_PASSWORD)
         except Exception as e:
             logger.error(f"Failed to connect to the database: {e}")
             raise DatabaseConnectionException(f"Failed to connect to the database: {e}") from e
@@ -79,7 +82,7 @@ class DatabaseManager:
         try:
             query = """
                 INSERT INTO invoices (supplier, invoice_number, 
-                invoice_date, total_ex_vat, vat_amount, total_inclusive, confidence)
+                invoice_date, total_ex_vat, vat_amount, total_inc_vat, confidence)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             with self.conn.cursor() as cursor:

@@ -32,8 +32,7 @@ class InvoiceValidator:
         return (self._validate_supplier() and
                 self._validate_invoice_number() and
                 self._validate_date() and
-                self._validate_totals() and
-                self._validate_confidence())
+                self._validate_totals())
         
     
         
@@ -54,13 +53,20 @@ class InvoiceValidator:
     # Validate the invoice date field in the invoice
     # Returns True if the invoice date is in the correct format, False otherwise
     def _validate_date(self) -> bool:
-        try:
-            datetime.strptime(self.invoice.invoice_date.strip(), 
-                              "%Y-%m-%d")
-            return True
-        except (ValueError, AttributeError):
-            return False
-        
+        date_formats=[
+            "%Y-%m-%d",
+                    "%d %b %Y",
+                    "%d %B %Y"
+                ]
+        for fmt in date_formats:
+            try:
+                datetime.strptime(self.invoice.invoice_date.strip(), fmt)
+                return True
+            except (ValueError, AttributeError):
+                pass
+            
+        return False    
+    
     # Validate the totals in the invoice
     # Returns True if the sum of total_ex_vat and vat_amount matches total_inc_vat within a small tolerance, False otherwise            
     def _validate_totals(self) -> bool:
@@ -70,4 +76,4 @@ class InvoiceValidator:
        
     def _validate_confidence(self) -> bool:
         
-        return self.invoice.confidence >= 0.8
+        return self.invoice.confidence >= 80.0
