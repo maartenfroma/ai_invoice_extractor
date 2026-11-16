@@ -65,7 +65,8 @@ class PDFExtractor:
 
                 logger.info("Finished PDF text extraction")
                 
-            
+                # Return the extracted text and its metadata 
+                # as a dictionary
                 return {"text": text, "metadata": metadata}
             
         except(EmptyPDFError, PDFReadError) as e :
