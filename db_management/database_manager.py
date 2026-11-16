@@ -14,6 +14,7 @@ from custom_exceptions.db_exceptions import DeleteException
 from custom_exceptions.db_exceptions import TableCreationException
 logger = logging.getLogger(__name__)
 
+from models.invoice import Invoice
 # DatabaseManager class to handle database operations such as 
 # creating tables and managing connections
 
@@ -42,14 +43,14 @@ class DatabaseManager:
                 query="""
                     CREATE TABLE IF NOT EXISTS invoices (
                         id SERIAL PRIMARY KEY,
-                        leverancier TEXT,
-                        factuurnummer TEXT,
-                        datum DATE,
-                        totaal_ex_btw NUMERIC(10,2),
-                        btw_bedrag NUMERIC(10,2),
-                        totaal_inclusief NUMERIC(10,2),
-                        vertrouwen NUMERIC,
-                        aangemaakt TIMESTAMP DEFAULT NOW()
+                        supplier TEXT,
+                        invoice_number TEXT,
+                        invoice_date DATE,
+                        total_ex_vat NUMERIC(10,2),
+                        vat_amount NUMERIC(10,2),
+                        total_inc_vat NUMERIC(10,2),
+                        confidence NUMERIC,
+                        created_at TIMESTAMP DEFAULT NOW()
                     )
                 """
                 
@@ -69,17 +70,16 @@ class DatabaseManager:
                 
                 # Rollback the transaction in case of an error
                 self.conn.rollback()
-                raise TableCreationException(f"Failed to create invoice table: {e}")
+                raise TableCreationException(f"Failed to create invoice table: {e}") from e
                 
      
      
     # Method to insert a new invoice into the invoices table
-    def insert_invoice(self, leverancier, factuurnummer, 
-                       datum, totaal_ex_btw, btw_bedrag, totaal_inclusief, vertrouwen):
+    def insert_invoice(self, invoice: Invoice):
         try:
             query = """
-                INSERT INTO invoices (leverancier, factuurnummer, 
-                datum, totaal_ex_btw, btw_bedrag, totaal_inclusief, vertrouwen)
+                INSERT INTO invoices (supplier, invoice_number, 
+                invoice_date, total_ex_vat, vat_amount, total_inclusive, confidence)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             with self.conn.cursor() as cursor:
@@ -87,7 +87,7 @@ class DatabaseManager:
                 # Execute the query to insert the new invoice into 
                 # the invoices table
                 
-                cursor.execute(query, (leverancier, factuurnummer, datum, totaal_ex_btw, btw_bedrag, totaal_inclusief, vertrouwen))
+                cursor.execute(query, (invoice.supplier, invoice.invoice_number, invoice.invoice_date, invoice.total_ex_vat, invoice.vat_amount, invoice.total_inc_vat, invoice.confidence))
             
             # Commit the transaction to save the changes
             self.conn.commit()
@@ -97,4 +97,4 @@ class DatabaseManager:
             
             # Rollback the transaction in case of an error
             self.conn.rollback()
-            raise InsertException(f"Failed to insert invoice: {e}")
+            raise InsertException(f"Failed to insert invoice: {e}") from e
