@@ -28,10 +28,16 @@ def main():
 
     # Example usage: extract text from a PDF file
     
-    pdf_file_path = "C:/Users/maart/OneDrive/Belastingdienst/Kw4_2026/Facturen/FM202500903-froma-media_markt.pdf"
+    pdf_file_path = "C:/Users/maart/OneDrive/FromaDataSolutions/Belastingdienst/Kw4_2026/Facturen/FM202500903-froma-media_markt.pdf"
     
-    with open(pdf_file_path, "rb") as pdf_file:
-        extracted_text = pdf_extractor.extract_text_from_pdf(pdf_file)
+    try:
+        with open(pdf_file_path, "rb") as pdf_file:
+            extracted_text = pdf_extractor.extract_text_from_pdf(pdf_file)
+    
+    except Exception as e:
+        print(f"Error extracting text from PDF: {e}")
+        return
+
 
     # Parse the extracted text into an invoice object
     invoice = invoice_parser.parse_invoice(extracted_text["text"])

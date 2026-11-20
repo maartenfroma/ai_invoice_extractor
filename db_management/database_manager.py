@@ -47,12 +47,27 @@ class DatabaseManager:
                     CREATE TABLE IF NOT EXISTS invoices (
                         id SERIAL PRIMARY KEY,
                         supplier TEXT,
-                        invoice_number TEXT,
+                        supplier_vat_number TEXT,
+                        supplier_chamber_of_commerce TEXT,
+                        
+                        invoice_number TEXT UNIQUE,
                         invoice_date DATE,
-                        total_ex_vat NUMERIC(10,2),
-                        vat_amount NUMERIC(10,2),
-                        total_inc_vat NUMERIC(10,2),
-                        confidence NUMERIC,
+                        due_date DATE,
+                        
+                        currency VARCHAR(10) DEFAULT 'EUR',
+                        
+                        total_ex_vat NUMERIC(12,2),
+                        vat_amount NUMERIC(12,2),
+                        total_inc_vat NUMERIC(12,2),
+                        
+                        category TEXT,
+                        ledger_account TEXT,
+                        
+                        confidence NUMERIC(5,2),
+                        
+                        booking_status TEXT DEFAULT 'PENDING',
+                        source_file TEXT,
+                        
                         created_at TIMESTAMP DEFAULT NOW()
                     )
                 """
@@ -81,16 +96,16 @@ class DatabaseManager:
     def insert_invoice(self, invoice: Invoice):
         try:
             query = """
-                INSERT INTO invoices (supplier, invoice_number, 
-                invoice_date, total_ex_vat, vat_amount, total_inc_vat, confidence)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO invoices (supplier, supplier_vat_number, supplier_chamber_of_commerce, invoice_number, 
+                invoice_date, due_date, currency, total_ex_vat, vat_amount, total_inc_vat, category, ledger_account, booking_status, source_file, confidence)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             with self.conn.cursor() as cursor:
                 
                 # Execute the query to insert the new invoice into 
                 # the invoices table
                 
-                cursor.execute(query, (invoice.supplier, invoice.invoice_number, invoice.invoice_date, invoice.total_ex_vat, invoice.vat_amount, invoice.total_inc_vat, invoice.confidence))
+                cursor.execute(query, (invoice.supplier, invoice.supplier_vat_number, invoice.supplier_chamber_of_commerce, invoice.invoice_number, invoice.invoice_date, invoice.due_date, invoice.currency, invoice.total_ex_vat, invoice.vat_amount, invoice.total_inc_vat, invoice.category, invoice.ledger_account, invoice.booking_status, invoice.source_file, invoice.confidence))
             
             # Commit the transaction to save the changes
             self.conn.commit()
