@@ -34,11 +34,13 @@ class Invoice:
     project_code: str=""
     
     # Metadata
-    confidence: float=0.0
+    confidence: int=0   
     booking_status: str="PENDING"
  
     # Source of the invoice data
     source_file: str=""
+    
+    
     
     # Convert the invoice instance to a dictionary for easy serialization
     
@@ -49,24 +51,40 @@ class Invoice:
     @classmethod
     def from_dict(cls, data: dict):
         # Create an Invoice instance from a dictionary
+        
         return cls(
+            
+            # Supplier details
             supplier=data.get("supplier", ""),
             supplier_vat_number=data.get("supplier_vat_number", ""),
             supplier_chamber_of_commerce=data.get("supplier_chamber_of_commerce", ""),
+            
+            # Invoice details
             invoice_number=data.get("invoice_number", ""),
             invoice_date=data.get("invoice_date", ""),
-            due_date=data.get("due_date",),
+            due_date=data.get("due_date", None),
             currency=data.get("currency", "EUR"),
+            
+            # Financial details
             total_ex_vat=data.get("total_ex_vat", 0.0),
             vat_amount=data.get("vat_amount", 0.0),
             total_inc_vat=data.get("total_inc_vat", 0.0),
             vat_code=data.get("vat_code", ""),
+            
+            # Accounting details
             category=data.get("category", ""),
             ledger_account=data.get("ledger_account", ""),
             cost_center=data.get("cost_center", ""),
             project_code=data.get("project_code", ""),
-            confidence=data.get("confidence", 0.0),
+            
+            # Metadata
+            confidence=data.get("confidence", 0),
             booking_status=data.get("booking_status", ""),
+            
+            # Source of the invoice data
             source_file=data.get("source_file", "")
         )
+        
+    
+    
     

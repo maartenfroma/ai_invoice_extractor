@@ -1,6 +1,10 @@
 import logging
+import os
 
 logger = logging.getLogger(__name__)
+
+from dotenv import load_dotenv
+
 
 from google import genai
 import json
@@ -8,7 +12,7 @@ from models.invoice import Invoice
 
 from custom_exceptions.parser_exceptions import InvalidJSONResponseException, InvoiceParsingException
 
-
+load_dotenv()
 
 class InvoiceParser:
     
@@ -17,6 +21,12 @@ class InvoiceParser:
                                     
                         
     def __init__(self, genai_client:genai.Client):
+        
+        GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+        if not GOOGLE_API_KEY:
+            raise ValueError("Missing GOOGLE_API_KEY environment variable")
+        
+        genai_client = genai.Client(api_key=GOOGLE_API_KEY)
         
         # Initialize the invoice parser
         self.genai_client = genai_client    
@@ -96,6 +106,8 @@ class InvoiceParser:
 
             # Log the parsed data for debugging purposes
             logger.info(f"Parsed invoice data: {parsed_data}")
+            
+            # Return the invoice object created from the parsed data
             return Invoice.from_dict(parsed_data)
         
         except Exception as e:

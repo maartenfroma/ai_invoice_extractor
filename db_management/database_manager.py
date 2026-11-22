@@ -5,13 +5,15 @@
 
 
 import logging
-
 import psycopg
 from custom_exceptions.db_exceptions import InsertException
 from custom_exceptions.db_exceptions import DatabaseConnectionException
 from custom_exceptions.db_exceptions import UpdateException
 from custom_exceptions.db_exceptions import DeleteException
 from custom_exceptions.db_exceptions import TableCreationException
+
+from psycopg.rows import dict_row
+
 logger = logging.getLogger(__name__)
 
 from models.invoice import Invoice
@@ -60,6 +62,8 @@ class DatabaseManager:
                         vat_amount NUMERIC(12,2),
                         total_inc_vat NUMERIC(12,2),
                         
+                        vat_code TEXT,
+                        
                         category TEXT,
                         ledger_account TEXT,
                         
@@ -95,17 +99,34 @@ class DatabaseManager:
     # Method to insert a new invoice into the invoices table
     def insert_invoice(self, invoice: Invoice):
         try:
+            
             query = """
                 INSERT INTO invoices (supplier, supplier_vat_number, supplier_chamber_of_commerce, invoice_number, 
-                invoice_date, due_date, currency, total_ex_vat, vat_amount, total_inc_vat, category, ledger_account, booking_status, source_file, confidence)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                invoice_date, due_date, currency, total_ex_vat, vat_amount, total_inc_vat, vat_code, category, ledger_account, booking_status, source_file, confidence)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             with self.conn.cursor() as cursor:
                 
                 # Execute the query to insert the new invoice into 
                 # the invoices table
-                
-                cursor.execute(query, (invoice.supplier, invoice.supplier_vat_number, invoice.supplier_chamber_of_commerce, invoice.invoice_number, invoice.invoice_date, invoice.due_date, invoice.currency, invoice.total_ex_vat, invoice.vat_amount, invoice.total_inc_vat, invoice.category, invoice.ledger_account, invoice.booking_status, invoice.source_file, invoice.confidence))
+                cursor.execute(query, (
+                    invoice.supplier,
+                    invoice.supplier_vat_number,
+                    invoice.supplier_chamber_of_commerce,
+                    invoice.invoice_number,
+                    invoice.invoice_date,
+                    invoice.due_date,
+                    invoice.currency,
+                    invoice.total_ex_vat,
+                    invoice.vat_amount,
+                    invoice.total_inc_vat,
+                    invoice.vat_code,
+                    invoice.category,
+                    invoice.ledger_account,
+                    invoice.booking_status,
+                    invoice.source_file,
+                    invoice.confidence
+                ))
             
             # Commit the transaction to save the changes
             self.conn.commit()
@@ -116,3 +137,40 @@ class DatabaseManager:
             # Rollback the transaction in case of an error
             self.conn.rollback()
             raise InsertException(f"Failed to insert invoice: {e}") from e
+           
+        
+    def get_invoices(self):
+        
+        try:
+            query = """
+                SELECT
+                    supplier,
+                    supplier_vat_number,
+                    supplier_chamber_of_commerce,
+                    invoice_number,
+                    invoice_date,
+                    due_date,
+                    currency,
+                    total_ex_vat,
+                    vat_amount,
+                    total_inc_vat,
+                    vat_code,
+                    category,
+                    ledger_account,
+                    confidence,
+                    booking_status,
+                    source_file
+                FROM invoices
+                ORDER BY invoice_date DESC
+            """
+
+            with self.conn.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query)
+
+                rows = cursor.fetchall()
+
+            return rows
+
+        except Exception as e:
+            logger.error(f"Failed to get invoices: {e}")
+            raise RuntimeError(f"Failed to get invoices: {e}") from e

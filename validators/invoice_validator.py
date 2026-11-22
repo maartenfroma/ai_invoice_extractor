@@ -22,20 +22,14 @@ class InvoiceValidator:
     # Validate the invoice data and return a 
     # tuple indicating validity and error messages
     
-    def validate(self) -> bool:
+    def validate(self) -> bool: 
         
-        # Use the provided invoice or fall back to the instance's invoice
-        if not self.invoice:
-            raise ValueError("No invoice provided") 
-        
-        # Fall back to the instance's invoice if no invoice is provided
+        # Validate the invoice by checking supplier, invoice number, date, and totals   
+        # All are True if valid, False otherwise
         return (self._validate_supplier() and
                 self._validate_invoice_number() and
                 self._validate_date() and
                 self._validate_totals())
-        
-    
-        
         
     
     # Validate the supplier field in the invoice

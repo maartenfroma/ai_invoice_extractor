@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 8501
 
-ENTRYPOINT ["python", "-m", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["python", "-m", "streamlit", "run", "ui_streamlit/app.py", "--server.port=8501", "--server.address=0.0.0.0"]

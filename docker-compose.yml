@@ -9,13 +9,12 @@ services:
     ports:
       - "5433:5432"
 
-  app:
+  web:
     build: .
     depends_on:
       - postgres
-
-  web:
-    build: .
+    env_file:
+      - .env
     image: factuuur_ai_piloot
     container_name: factuuur_ai_piloot
     ports:
@@ -24,4 +23,4 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - STREAMLIT_SERVER_PORT=8501
-      - STREAMLIT_SERVER_ADDRESS=0.0.0.0  
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0

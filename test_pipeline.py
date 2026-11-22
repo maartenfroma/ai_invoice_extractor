@@ -1,6 +1,5 @@
 from invoice_extractor.pdf_extractor import PDFExtractor
 from invoice_parsers.invoice_parser import InvoiceParser
-from models import invoice
 from validators.invoice_validator import InvoiceValidator
 from validators.confidence_calculator import ConfidenceCalculator
 from db_management.database_manager import DatabaseManager

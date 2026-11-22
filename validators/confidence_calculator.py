@@ -15,10 +15,12 @@ class ConfidenceCalculator:
         
         # Store the invoice and its validity status for confidence calculation
         self.invoice = invoice
+        
+        # Store the validity status of the invoice for confidence calculation
         self.is_valid = is_valid
 
     # Calculate the confidence score for the invoice
-    def calculate_confidence(self) -> float:
+    def calculate_confidence(self) -> int:
        
 
         # Initialize confidence score
@@ -26,7 +28,7 @@ class ConfidenceCalculator:
 
         if not self.invoice:
             logger.error("No invoice data provided")
-            return 0.0
+            return 0
 
         if not self.invoice.supplier:
            confidence-=10
@@ -59,4 +61,4 @@ class ConfidenceCalculator:
         # Return the final confidence score, 
         # ensuring it is not negative
         
-        return max(confidence, 0.0)
+        return max(confidence, 0)
