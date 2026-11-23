@@ -227,3 +227,27 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Failed to get dashboard stats: {e}")
             raise RuntimeError(f"Failed to get dashboard stats: {e}") from e
+        
+    
+    # Get the total invoice amount per supplier
+    def get_supplier_totals(self, supplier: str):
+        try:
+            query = """
+                SELECT
+                    supplier,
+                    COALESCE(SUM(total_inc_vat), 0) AS total_inc_vat
+                FROM invoices
+              GROUP BY supplier
+              ORDER BY total_inc_vat DESC
+            """
+
+            with self.conn.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+            # Return the list of suppliers with their total invoice amounts
+            return rows
+
+        except Exception as e:
+            logger.error(f"Failed to get supplier totals: {e}")
+            raise RuntimeError(f"Failed to get supplier totals: {e}") from e    
