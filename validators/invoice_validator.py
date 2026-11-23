@@ -2,6 +2,9 @@ import logging
 import re
 from datetime import datetime
 from models.invoice import Invoice
+
+from db_management.database_manager import DatabaseManager
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +32,9 @@ class InvoiceValidator:
         return (self._validate_supplier() and
                 self._validate_invoice_number() and
                 self._validate_date() and
-                self._validate_totals())
+                self._validate_totals() and
+                self._validate_vat_amount() and
+                self._validate_no_duplicates())
         
     
     # Validate the supplier field in the invoice
@@ -71,3 +76,29 @@ class InvoiceValidator:
     def _validate_confidence(self) -> bool:
         
         return self.invoice.confidence >= 80.0
+    
+    
+    # Validate the VAT amount in the invoice
+    # Returns True if the VAT amount matches the difference between total_inc_vat and total_ex_vat within a small tolerance, False otherwise
+    def _validate_vat_amount(self) -> bool:
+        
+        calculated_vat = float(self.invoice.total_inc_vat) - float(self.invoice.total_ex_vat)
+        
+        return abs(calculated_vat - float(self.invoice.vat_amount)) <= 0.01
+    
+    
+    # Validate if the invoice is a duplicate in the database
+    # Returns false if a duplicate is found, True otherwise
+    def _validate_no_duplicates(self) -> bool:
+        
+        db_manager = DatabaseManager()
+        
+        # Check if an invoice with the same supplier and invoice number 
+        # already exists in the database
+        existing_invoice = db_manager.get_invoice_by_supplier_invoice(
+            supplier=self.invoice.supplier,
+            invoice_number=self.invoice.invoice_number
+        )
+        
+        # Return True if no duplicate is found, False otherwise
+        return existing_invoice is None

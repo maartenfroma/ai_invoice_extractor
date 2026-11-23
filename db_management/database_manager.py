@@ -138,8 +138,9 @@ class DatabaseManager:
             self.conn.rollback()
             raise InsertException(f"Failed to insert invoice: {e}") from e
            
-        
-    def get_invoices(self):
+    
+    # Method to retrieve all invoices from the invoices table   
+    def get_all_invoices(self):
         
         try:
             query = """
@@ -174,3 +175,55 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Failed to get invoices: {e}")
             raise RuntimeError(f"Failed to get invoices: {e}") from e
+        
+        
+    def get_invoice_by_supplier_invoice(self, supplier: str, invoice_number: str):
+        
+        try:
+            query = """
+                SELECT *
+                   
+                FROM invoices
+                WHERE supplier = %s AND invoice_number = %s
+            """
+
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (supplier, invoice_number))
+                row = cursor.fetchone()
+
+            # Return the invoice row if found, None otherwise
+            return row
+
+        except Exception as e:
+            logger.error(f"Failed to get invoice by supplier and number: {e}")
+            raise RuntimeError(f"Failed to get invoice by supplier and number: {e}") from e
+        
+        
+    def get_dashboard_stats(self):
+        try:
+            query = """
+                SELECT
+                    COUNT(*) AS invoice_count,
+                    COALESCE(SUM(total_inc_vat), 0) AS total_inc_vat,
+                    COUNT(DISTINCT supplier) AS supplier_count,
+                    COALESCE(SUM(vat_amount), 0) AS vat_total
+                    
+                FROM invoices
+            """
+
+            with self.conn.cursor() as cursor:
+                
+                cursor.execute(query)
+                row = cursor.fetchone()
+
+            # Map the row values to a dictionary for easier access
+            return {
+                    "invoice_count": row[0],
+                    "total_amount": row[1],
+                    "supplier_count": row[2],
+                    "vat_total": row[3]
+                }
+
+        except Exception as e:
+            logger.error(f"Failed to get dashboard stats: {e}")
+            raise RuntimeError(f"Failed to get dashboard stats: {e}") from e
