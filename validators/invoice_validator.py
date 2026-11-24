@@ -95,10 +95,9 @@ class InvoiceValidator:
         
         # Check if an invoice with the same supplier and invoice number 
         # already exists in the database
-        existing_invoice = db_manager.get_invoice_by_supplier_invoice(
-            supplier=self.invoice.supplier,
-            invoice_number=self.invoice.invoice_number
-        )
+        existing_invoice = db_manager.get_invoices_by_supplier(
+            supplier=self.invoice.supplier)
+        
         
         # Return True if no duplicate is found, False otherwise
         return existing_invoice is None

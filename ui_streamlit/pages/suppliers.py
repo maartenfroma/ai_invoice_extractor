@@ -17,6 +17,7 @@ else:
 supplier=st.selectbox("Selecteer een leverancier", [row[0] for row in rows])
 
 rows=db_manager.get_invoices_by_supplier(supplier)  # Replace with your actual method to fetch invoices for the selected supplier
+
 if rows:
     
     df = pd.DataFrame(rows  )

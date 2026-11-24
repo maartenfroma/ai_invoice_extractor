@@ -13,7 +13,7 @@ st.title("📋 Factuuroverzicht")
 rows=db.get_all_invoices()
 
 if rows:
-    df = pd.DataFrame(rows, columns=["ID", "Factuurnummer", "Datum", "Bedrag", "Leverancier"])
+    df = pd.DataFrame(rows)
     st.dataframe(df,use_container_width=True,hide_index=True)
 else:
     st.write("Geen facturen gevonden.") 

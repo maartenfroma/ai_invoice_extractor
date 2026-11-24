@@ -177,26 +177,25 @@ class DatabaseManager:
             raise RuntimeError(f"Failed to get invoices: {e}") from e
         
         
-    def get_invoice_by_supplier_invoice(self, supplier: str, invoice_number: str):
+    def get_invoices_by_supplier(self, supplier: str):
         
         try:
             query = """
                 SELECT *
-                   
                 FROM invoices
-                WHERE supplier = %s AND invoice_number = %s
+                WHERE supplier = %s
             """
 
-            with self.conn.cursor() as cursor:
-                cursor.execute(query, (supplier, invoice_number))
-                row = cursor.fetchone()
+            with self.conn.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query, (supplier,))
+                rows = cursor.fetchall()
 
             # Return the invoice row if found, None otherwise
-            return row
+            return rows
 
         except Exception as e:
-            logger.error(f"Failed to get invoice by supplier and number: {e}")
-            raise RuntimeError(f"Failed to get invoice by supplier and number: {e}") from e
+            logger.error(f"Failed to get invoices by supplier: {e}")
+            raise RuntimeError(f"Failed to get invoices by supplier: {e}") from e
         
         
     def get_dashboard_stats(self):
@@ -230,19 +229,19 @@ class DatabaseManager:
         
     
     # Get the total invoice amount per supplier
-    def get_supplier_totals(self, supplier: str):
+    def get_supplier_totals(self):
         try:
             query = """
                 SELECT
                     supplier,
                     COALESCE(SUM(total_inc_vat), 0) AS total_inc_vat
                 FROM invoices
-              WHERE supplier = %s
+              GROUP BY supplier
               ORDER BY total_inc_vat DESC
             """
 
             with self.conn.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(query, (supplier,))
+                cursor.execute(query)
                 rows = cursor.fetchall()
 
             # Return the list of suppliers with their total invoice amounts
