@@ -237,12 +237,12 @@ class DatabaseManager:
                     supplier,
                     COALESCE(SUM(total_inc_vat), 0) AS total_inc_vat
                 FROM invoices
-              GROUP BY supplier
+              WHERE supplier = %s
               ORDER BY total_inc_vat DESC
             """
 
-            with self.conn.cursor() as cursor:
-                cursor.execute(query)
+            with self.conn.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query, (supplier,))
                 rows = cursor.fetchall()
 
             # Return the list of suppliers with their total invoice amounts

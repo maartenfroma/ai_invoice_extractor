@@ -7,6 +7,11 @@ import pandas as pd
 # Initialize the database manager and set up the dashboard page
 db_manager = DatabaseManager()
 
+try:
+    db_manager.create_invoice_table()
+except Exception as e:
+    st.error(f"Failed to create invoice table: {e}")
+
 # Set up the dashboard page title and layout
 st.title("📊 Dashboard")
 
@@ -41,14 +46,6 @@ if stats:
     else:
         st.info("Geen recente facturen gevonden.")
         
-    supplier_totals = db_manager.get_supplier_totals()  # Replace with the desired supplier name
-    
-    df_supplier_totals = pd.DataFrame(supplier_totals, columns=["Supplier", "Total Inc VAT"])   
-    
-    st.dataframe(df_supplier_totals, use_container_width=True, hide_index=True)
-    
-    fig = px.bar(df_supplier_totals, x="Supplier", y="Total Inc VAT", title="Total Inc VAT per Supplier")
-    st.plotly_chart(fig, use_container_width=True)
-        
+   
         
     
