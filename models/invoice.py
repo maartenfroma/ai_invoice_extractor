@@ -1,8 +1,6 @@
 from dataclasses import dataclass, asdict
 
 
-
-
 # Invoice dataclass to store invoice details and related financial information
 
 @dataclass

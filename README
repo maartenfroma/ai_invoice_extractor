@@ -1,0 +1,79 @@
+# AI Invoice Processing Platform
+
+An intelligent invoice processing platform built with Python, Streamlit, and PostgreSQL.
+
+The application automates invoice extraction, validation, storage, and analysis, helping SMEs reduce manual administrative tasks and gain valuable business insights.
+
+## Features
+
+### Dashboard
+- Total invoices
+- Total invoice value
+- Total VAT amount
+- Total suppliers
+- Recent invoice overview
+
+### Invoice Upload
+- Upload PDF invoices
+- Automatic data extraction
+- Invoice validation
+- Duplicate detection
+- Confidence scoring
+- Database storage
+
+### Invoice Management
+- View all invoices
+- Search and filter invoices
+- View invoice details
+- Track booking status
+
+### Supplier Management
+- Supplier overview
+- Total invoice value per supplier
+- Supplier invoice history
+
+## Invoice Fields
+
+The platform captures and stores:
+
+- Supplier
+- VAT Number
+- Chamber of Commerce Number
+- Invoice Number
+- Invoice Date
+- Due Date
+- Currency
+- Total Excluding VAT
+- VAT Amount
+- Total Including VAT
+- VAT Code
+- Category
+- Ledger Account
+- Booking Status
+- Confidence Score
+
+## Technology Stack
+
+- Python
+- Streamlit
+- PostgreSQL
+- Psycopg3
+- Pandas
+- Plotly
+- PyMuPDF (Fitz)
+
+## Database
+
+The application uses PostgreSQL to store invoice information.
+
+Main table:
+
+- invoices
+
+Key features:
+
+- Unique invoice numbers
+- Supplier tracking
+- VAT calculations
+- Confidence scoring
+- Invoice status management

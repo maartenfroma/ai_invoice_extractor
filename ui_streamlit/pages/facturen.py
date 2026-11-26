@@ -20,3 +20,20 @@ if rows:
     st.dataframe(df,use_container_width=True,hide_index=True)
 else:
     st.write("Geen facturen gevonden.") 
+
+# Search for invoices based on supplier or invoice number
+search_term = st.selectbox(
+    "Zoek facturen op leverancier of factuurnummer",
+    options=[""] + [str(row[4]) for row in rows] + [str(row[1]) for row in rows]
+)
+
+
+if search_term:
+    filtered_rows = [row for row in rows if search_term.lower() in str(row).lower()]
+    if filtered_rows:
+        df = pd.DataFrame(filtered_rows, columns=headers)
+        st.dataframe(df, use_container_width=True, hide_index=True)
+    else:
+        st.write("Geen facturen gevonden voor de zoekterm.")
+    
+

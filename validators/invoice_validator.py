@@ -14,6 +14,17 @@ logger = logging.getLogger(__name__)
 #Return a tuple indicating whether the invoice data is valid 
 # and any error messages
 
+# Contains the following methods
+#* validate
+#* _validate_supplier
+#* _validate_invoice_number
+#* _validate_date
+#* _validate_totals
+#* _validate_confidence
+#* _validate_vat_amount
+#* _validate_no_duplicates
+#* _validate_category
+
 class InvoiceValidator: 
     
     db_manager = DatabaseManager()
@@ -106,4 +117,9 @@ class InvoiceValidator:
         
         # True if no duplicate is found, False otherwise
         return (self.invoice.supplier, self.invoice.invoice_number) not in no_duplicates
+    
+    def _validate_category(self) -> bool:
+        
+        # Returns True if the category field is non-empty, False otherwise
+        return bool(self.invoice.category.strip())
        
