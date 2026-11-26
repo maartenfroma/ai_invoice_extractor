@@ -9,6 +9,7 @@ db_manager = DatabaseManager()
 
 try:
     db_manager.create_invoice_table()
+    
 except Exception as e:
     st.error(f"Failed to create invoice table: {e}")
 
@@ -38,9 +39,10 @@ if stats:
     st.subheader("📄 Recente facturen")
     
     # Fetch all invoices from the database returns rows as a list of dictionaries
-    df_invoices = db_manager.get_all_invoices()
+    rows, headers = db_manager.get_all_invoices()
+    df_invoices = pd.DataFrame(rows, columns=headers)
     
-    if df_invoices:
+    if not df_invoices.empty:
         st.dataframe(df_invoices, use_container_width=True, hide_index=True)
     
     else:

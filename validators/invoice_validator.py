@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from wsgiref import headers
 from models.invoice import Invoice
 
 from db_management.database_manager import DatabaseManager
@@ -13,7 +14,9 @@ logger = logging.getLogger(__name__)
 #Return a tuple indicating whether the invoice data is valid 
 # and any error messages
 
-class InvoiceValidator:     
+class InvoiceValidator: 
+    
+    db_manager = DatabaseManager()
     
     def __init__(self, invoice: Invoice):
         
@@ -91,13 +94,16 @@ class InvoiceValidator:
     # Returns false if a duplicate is found, True otherwise
     def _validate_no_duplicates(self) -> bool:
         
-        db_manager = DatabaseManager()
+        db_manager = self.db_manager
         
-        # Check if an invoice with the same supplier and invoice number 
-        # already exists in the database
-        existing_invoice = db_manager.get_invoices_by_supplier(
-            supplier=self.invoice.supplier)
+        # Retrieve all invoices from the database to check for duplicates
+        rows,_ = db_manager.get_all_invoices()
         
+        no_duplicates=set()
         
-        # Return True if no duplicate is found, False otherwise
-        return existing_invoice is None
+        for row in rows:
+            no_duplicates.add((row["supplier"], row["invoice_number"]))
+        
+        # True if no duplicate is found, False otherwise
+        return (self.invoice.supplier, self.invoice.invoice_number) not in no_duplicates
+       

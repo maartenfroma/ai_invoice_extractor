@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize the database manager for saving invoices
+# Initialize the database manager 
 db_manager = DatabaseManager()
 
 # Create the invoice table in the database if it doesn't exist yet  
@@ -39,21 +39,20 @@ if uploaded_files:
             # Parse the extracted invoice data into a structured format
             invoice_parser = InvoiceParser(genai_client)
             parsed_invoice = invoice_parser.parse_invoice(invoice_data)
-            st.json(parsed_invoice.to_dict())
+            
+            st.write(type(parsed_invoice))
             st.write(parsed_invoice)    
             
             # Validate the parsed invoice data
             validator=InvoiceValidator(parsed_invoice)
             is_valid= validator.validate()
             
-            # Display validation result to the user
-            if is_valid:
-                st.success("Invoice is valid.")
-                
-                # Insert the valid invoice into the database
+            try:
                 db_manager.insert_invoice(parsed_invoice)
-            else:
-                st.error(f"Invoice is invalid.")
+                st.write(f"invoice inserted: {uploaded_file.name}")
+                
+            except Exception as e:
+                st.error(f"Failed to insert invoice: {e}")
             
             # Calculate and display the confidence score for the parsed invoice
             confidence_obj = ConfidenceCalculator(parsed_invoice, is_valid)

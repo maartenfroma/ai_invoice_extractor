@@ -1,9 +1,3 @@
-
-
-# DatabaseManager class to handle database operations such as 
-# creating tables and managing connections
-
-
 import logging
 import psycopg
 from custom_exceptions.db_exceptions import InsertException
@@ -23,6 +17,14 @@ from config import DB_HOST, DB_NAME, DB_PORT, DB_USER, DB_PASSWORD
 # creating tables and managing connections
 
 # Returns a DatabaseManager instance with an active database connection
+# This class provides the following methods:
+
+# - create_invoice_table: Creates the invoices table if it doesn't exist "returns
+# - insert_invoice: Inserts a new invoice into the invoices table
+# - get_all_invoices: Retrieves all invoices from the invoices table
+# - get_invoices_by_supplier: Retrieves invoices from the invoices table by supplier
+# - get_dashboard_stats: Retrieves dashboard statistics from the invoices table
+# - get_supplier_totals: Retrieves the total amounts for each supplier from the invoices table
 
 class DatabaseManager:
     
@@ -145,22 +147,7 @@ class DatabaseManager:
         try:
             query = """
                 SELECT
-                    supplier,
-                    supplier_vat_number,
-                    supplier_chamber_of_commerce,
-                    invoice_number,
-                    invoice_date,
-                    due_date,
-                    currency,
-                    total_ex_vat,
-                    vat_amount,
-                    total_inc_vat,
-                    vat_code,
-                    category,
-                    ledger_account,
-                    confidence,
-                    booking_status,
-                    source_file
+                    *
                 FROM invoices
                 ORDER BY invoice_date DESC
             """
@@ -168,9 +155,17 @@ class DatabaseManager:
             with self.conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(query)
 
+                # Fetch all invoice rows from the query result
                 rows = cursor.fetchall()
 
-            return rows
+                # Fetch the column headers from the cursor description for the DataFrame columns
+                headers = list(rows[0].keys()) if rows else []
+                
+                
+            # Return the fetched rows and headers for the DataFrame columns
+            # DataType is Tuple[List[Tuple], List[str]] where the first element is 
+            # the list of invoice rows and the second element is the list of column headers    
+            return rows, headers
 
         except Exception as e:
             logger.error(f"Failed to get invoices: {e}")
