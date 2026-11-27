@@ -39,29 +39,55 @@ class InvoiceValidator:
     # Validate the invoice data and return a 
     # tuple indicating validity and error messages
     
-    def validate(self) -> bool: 
+    def validate(self) -> tuple: 
         
         # Validate the invoice by checking supplier, invoice number, date, and totals   
         # All are True if valid, False otherwise
-        return (self._validate_supplier() and
-                self._validate_invoice_number() and
-                self._validate_date() and
-                self._validate_totals() and
-                self._validate_vat_amount() and
-                self._validate_no_duplicates())
+        validations = [
+            self._validate_supplier(),
+            self._validate_invoice_number(),
+            self._validate_date(),
+            self._validate_totals(),
+            self._validate_vat_amount(),
+            self._validate_no_duplicates()
+        ]
+        
+        # Collect all validation errors from the individual validation methods
+        validation_errors = []
+        
+        # Iterate through the validation results and collect errors
+        for valid, error in validations:
+            
+            # If the validation result is not valid, collect the error message
+            if not valid:
+                validation_errors.append(error)
+                
+        # If there are any validation errors, return False with the concatenated error messages
+        if validation_errors:
+            
+            # Return False along with all collected validation error messages
+            return False, "; ".join(validation_errors)
+        
+        # If there are no validation errors, return True with an empty error message
+        return True, ""
         
     
     # Validate the supplier field in the invoice
     # Returns True if the supplier field is non-empty, False otherwise
     def _validate_supplier(self) -> bool:
         
-        return bool(self.invoice.supplier.strip())
+        if not self.invoice.supplier.strip():
+            return False, "Supplier is empty"
+        return True, ""
     
     # Validate the invoice number field in the invoice
     # Returns True if the invoice number matches the expected pattern, False otherwise
     def _validate_invoice_number(self) -> bool:
-       return bool(re.match(r"^[A-Za-z0-9\-_\/]+$", 
-                            self.invoice.invoice_number.strip()))
+        
+        
+        if not re.match(r"^[A-Za-z0-9\-_\/]+$", self.invoice.invoice_number.strip()):
+            return False, "Invalid invoice number"
+        return True, ""
 
     # Validate the invoice date field in the invoice
     # Returns True if the invoice date is in the correct format, False otherwise
@@ -74,22 +100,25 @@ class InvoiceValidator:
         for fmt in date_formats:
             try:
                 datetime.strptime(self.invoice.invoice_date.strip(), fmt)
-                return True
+                return True, ""
             except (ValueError, AttributeError):
                 pass
             
-        return False    
+        return False, "Invalid date format"
     
     # Validate the totals in the invoice
     # Returns True if the sum of total_ex_vat and vat_amount matches total_inc_vat within a small tolerance, False otherwise            
     def _validate_totals(self) -> bool:
-      
-            calculated_total = float(self.invoice.total_ex_vat) + float(self.invoice.vat_amount)
-            return abs(calculated_total - float(self.invoice.total_inc_vat)) <= 0.01
+        calculated_total = float(self.invoice.total_ex_vat) + float(self.invoice.vat_amount)
+        if not abs(calculated_total - float(self.invoice.total_inc_vat)) <= 0.01:
+            return False, "Totals do not match"
+        return True, ""
        
     def _validate_confidence(self) -> bool:
         
-        return self.invoice.confidence >= 80.0
+        if self.invoice.confidence < 80.0:
+            return False, "Confidence below threshold"
+        return True, ""
     
     
     # Validate the VAT amount in the invoice
@@ -98,7 +127,10 @@ class InvoiceValidator:
         
         calculated_vat = float(self.invoice.total_inc_vat) - float(self.invoice.total_ex_vat)
         
-        return abs(calculated_vat - float(self.invoice.vat_amount)) <= 0.01
+        if not abs(calculated_vat - float(self.invoice.vat_amount)) <= 0.01:
+            return False, "VAT amount does not match"
+        return True, ""
+        
     
     
     # Validate if the invoice is a duplicate in the database
@@ -116,10 +148,38 @@ class InvoiceValidator:
             no_duplicates.add((row["supplier"], row["invoice_number"]))
         
         # True if no duplicate is found, False otherwise
-        return (self.invoice.supplier, self.invoice.invoice_number) not in no_duplicates
+        if not (self.invoice.supplier, self.invoice.invoice_number) in no_duplicates:
+            return True, ""
+        
+        return False, "Duplicate invoice found"
     
     def _validate_category(self) -> bool:
         
         # Returns True if the category field is non-empty, False otherwise
-        return bool(self.invoice.category.strip())
+        if not bool(self.invoice.category.strip()):
+            return False, "No category specified"
+        
+        return True, ""
+    
+    def get_validated_invoice(self):
+        try:
+            query="""
+            SELECT * FROM invoices
+            WHERE booking_status = 'VALIDATED' 
+            ORDER BY invoice_date DESC
+            """
+            with self.conn.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                
+            return rows
+            
+        except Exception as e:
+            logger.error(
+                f"Failed to get validated invoices: {e}"
+            )
+
+        raise RuntimeError(
+            f"Failed to get validated invoices: {e}"
+        ) from e
        

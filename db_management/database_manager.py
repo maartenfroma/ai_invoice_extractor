@@ -25,6 +25,8 @@ from config import DB_HOST, DB_NAME, DB_PORT, DB_USER, DB_PASSWORD
 # - get_invoices_by_supplier: Retrieves invoices from the invoices table by supplier
 # - get_dashboard_stats: Retrieves dashboard statistics from the invoices table
 # - get_supplier_totals: Retrieves the total amounts for each supplier from the invoices table
+# - get_invoices_by_status: Retrieves an invoice from the invoices table by its invoice number
+# - update_invoice_status: Updates the booking status of an invoice by its invoice number
 
 class DatabaseManager:
     
@@ -69,9 +71,9 @@ class DatabaseManager:
                         category TEXT,
                         ledger_account TEXT,
                         
-                        confidence NUMERIC(5,2),
+                        confidence NUMERIC,
                         
-                        booking_status TEXT DEFAULT 'PENDING',
+                        booking_status TEXT DEFAULT 'NEW',
                         source_file TEXT,
                         
                         created_at TIMESTAMP DEFAULT NOW()
@@ -213,7 +215,7 @@ class DatabaseManager:
             # Map the row values to a dictionary for easier access
             return {
                     "invoice_count": row[0],
-                    "total_amount": row[1],
+                    "total_inc_vat": row[1],
                     "supplier_count": row[2],
                     "vat_total": row[3]
                 }
@@ -245,3 +247,41 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Failed to get supplier totals: {e}")
             raise RuntimeError(f"Failed to get supplier totals: {e}") from e    
+        
+    
+    def get_invoices_by_status(self, status: str):
+        try:
+            query = """
+                SELECT *
+                FROM invoices
+                WHERE booking_status = %s
+                ORDER BY invoice_date DESC
+            """
+
+            with self.conn.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query, (status,))
+                
+                rows = cursor.fetchall()
+
+            # Return the invoice row if found, None otherwise
+            return rows
+
+        except Exception as e:
+            logger.error(f"Failed to get invoices by status: {e}")
+            raise RuntimeError(f"Failed to get invoices by status: {e}") from e
+        
+    def update_invoice_status(self, invoice_number: str, new_status: str):
+        try:
+            query = """
+                UPDATE invoices
+                SET booking_status = %s
+                WHERE invoice_number = %s
+            """
+
+            with self.conn.cursor() as cursor:
+                cursor.execute(query, (new_status, invoice_number))
+                self.conn.commit()
+
+        except Exception as e:
+            logger.error(f"Failed to update invoice status: {e}")
+            raise RuntimeError(f"Failed to update invoice status: {e}") from e

@@ -16,9 +16,17 @@ upload_page = st.Page("pages/facturen_laden.py", title="Facturen laden", icon="�
 # Set up the invoice page for viewing invoices
 invoices_page = st.Page("pages/facturen.py", title="Facturen", icon="📄")
 
+# Set up the supplier page for managing suppliers
 supplier_page = st.Page("pages/leveranciers.py", title="Leveranciers", icon="🏢")
 
+# Set up the control page for reviewing invoices
+controle_page = st.Page("pages/controle_facturen.py", title="Controle", icon="✔️") 
+
+export_summary=st.Page("pages/export_summary.py", title="Export Summary", icon="📦")
+
+
+
 # Set up the navigation for switching between pages
-pg=st.navigation([dash, upload_page, invoices_page, supplier_page])
+pg=st.navigation([dash, upload_page, invoices_page, supplier_page, controle_page, export_summary])
 
 pg.run()

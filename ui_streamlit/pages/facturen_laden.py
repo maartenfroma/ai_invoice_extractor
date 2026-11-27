@@ -4,10 +4,13 @@ from invoice_extractor.pdf_extractor import PDFExtractor
 from invoice_parsers.invoice_parser import InvoiceParser
 from validators.invoice_validator import InvoiceValidator
 from validators.confidence_calculator import ConfidenceCalculator
+from helper_file.booking_status import get_status_label
 
 from google import genai
 import os
 from dotenv import load_dotenv
+
+
 
 load_dotenv()
 
@@ -45,19 +48,38 @@ if uploaded_files:
             
             # Validate the parsed invoice data
             validator=InvoiceValidator(parsed_invoice)
-            is_valid= validator.validate()
             
-            try:
-                db_manager.insert_invoice(parsed_invoice)
-                st.write(f"invoice inserted: {uploaded_file.name}")
+            # Returns a tuple indicating whether the invoice is valid and any validation error messages
+            is_valid, validation_error= validator.validate()
+            
+            if is_valid:
                 
-            except Exception as e:
-                st.error(f"Failed to insert invoice: {e}")
+                status="VALIDATED"
+                parsed_invoice.booking_status = status
+                st.success(get_status_label(status))
+                
+            else:
+                status="REJECTED"
+                parsed_invoice.booking_status = status
+                st.error(get_status_label(status))
+            
             
             # Calculate and display the confidence score for the parsed invoice
             confidence_obj = ConfidenceCalculator(parsed_invoice, is_valid)
             confidence_score = confidence_obj.calculate_confidence()
+            
+            # Assign the calculated confidence score to the parsed invoice object
+            parsed_invoice.confidence = confidence_score
+            
+            try:
+                db_manager.insert_invoice(parsed_invoice)
+                st.write(f"factuur geladen: {uploaded_file.name}")
+                            
+            except Exception as e:
+                st.error(f"Factuur laden mislukt: {e}")
+            
             st.write(f"Confidence score: {confidence_score}")
             
+            st.success("Alle facturen zijn geladen.")
           
             st.write("---")

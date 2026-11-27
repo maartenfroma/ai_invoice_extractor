@@ -24,10 +24,11 @@ else:
 # Search for invoices based on supplier or invoice number
 search_term = st.selectbox(
     "Zoek facturen op leverancier of factuurnummer",
-    options=[""] + [str(row[4]) for row in rows] + [str(row[1]) for row in rows]
+    options=[""] + [str(row["invoice_number"]) for row in rows] + 
+    [str(row["supplier"]) for row in rows]
 )
 
-
+# Filter and display invoices based on the selected search term
 if search_term:
     filtered_rows = [row for row in rows if search_term.lower() in str(row).lower()]
     if filtered_rows:
