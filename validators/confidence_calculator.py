@@ -20,43 +20,43 @@ class ConfidenceCalculator:
         self.is_valid = is_valid
 
     # Calculate the confidence score for the invoice
-    def calculate_confidence(self) -> int:
+    def calculate_confidence(self) -> float:
        
 
         # Initialize confidence score
         confidence = 100
 
         if not self.invoice:
-            logger.error("No invoice data provided")
+            logger.error("Geen factuurgegevens verstrekt")
             return 0
 
         if not self.invoice.supplier:
            confidence-=10
-           logger.debug("Supplier field is missing, reducing confidence by 10")
+           logger.debug("Leverancier veld ontbreekt, vertrouwen met 10 verlaagd")
            
         if not self.invoice.invoice_number:
             confidence -= 10
-            logger.debug("Invoice number field is missing, reducing confidence by 10")
+            logger.debug("Factuurnummer veld ontbreekt, vertrouwen met 10 verlaagd")
 
         if not self.invoice.invoice_date:
             confidence -= 10
-            logger.debug("Invoice date field is missing, reducing confidence by 10")
+            logger.debug("Factuurdatum veld ontbreekt, vertrouwen met 10 verlaagd")
 
         if not self.invoice.total_ex_vat or self.invoice.total_ex_vat < 0:
             confidence -= 10
-            logger.debug("Total ex VAT field is missing or negative, reducing confidence by 10")
+            logger.debug("Totaal exclusief BTW veld ontbreekt of is negatief, vertrouwen met 10 verlaagd")
 
         if self.invoice.vat_amount is None or self.invoice.vat_amount < 0:
             confidence -= 10
-            logger.debug("VAT amount field is missing or negative, reducing confidence by 10")
+            logger.debug("BTW bedrag veld ontbreekt of is negatief, vertrouwen met 10 verlaagd")
 
         if not self.invoice.total_inc_vat or self.invoice.total_inc_vat < 0:
             confidence -= 10
-            logger.debug("Total inc VAT field is missing or negative, reducing confidence by 10")
+            logger.debug("Totaal inclusief BTW veld ontbreekt of is negatief, vertrouwen met 10 verlaagd")
 
         if not self.is_valid:
             confidence -= 25
-            logger.debug("Invoice is not valid, reducing confidence by 25")
+            logger.debug("Factuur is niet geldig, vertrouwen met 25 verlaagd")
 
         # Return the final confidence score, 
         # ensuring it is not negative

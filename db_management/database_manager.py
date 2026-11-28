@@ -40,8 +40,9 @@ class DatabaseManager:
                                         user=DB_USER,
                                         password=DB_PASSWORD)
         except Exception as e:
-            logger.error(f"Failed to connect to the database: {e}")
-            raise DatabaseConnectionException(f"Failed to connect to the database: {e}") from e
+            logger.error(f"Niet gelukt om verbinding te maken met de database: {e}")
+            
+            raise DatabaseConnectionException(f"Niet gelukt om verbinding te maken met de database: {e}") from e
       
     def create_invoice_table(self):
             
@@ -92,11 +93,11 @@ class DatabaseManager:
                 
             except Exception as e:
                 
-                logger.error(f"Failed to create invoice table: {e}")
+                logger.error(f"Niet gelukt om de factuur tabel aan te maken: {e}")
                 
                 # Rollback the transaction in case of an error
                 self.conn.rollback()
-                raise TableCreationException(f"Failed to create invoice table: {e}") from e
+                raise TableCreationException(f"Niet gelukt om de factuur tabel aan te maken: {e}") from e
                 
      
      
@@ -136,11 +137,11 @@ class DatabaseManager:
             self.conn.commit()
             
         except Exception as e:
-            logger.error(f"Failed to insert invoice: {e}")
+            logger.error(f"Niet gelukt om de factuur in te voegen: {e}")
             
             # Rollback the transaction in case of an error
             self.conn.rollback()
-            raise InsertException(f"Failed to insert invoice: {e}") from e
+            raise InsertException(f"Niet gelukt om de factuur in te voegen: {e}") from e
            
     
     # Method to retrieve all invoices from the invoices table   
@@ -170,8 +171,8 @@ class DatabaseManager:
             return rows, headers
 
         except Exception as e:
-            logger.error(f"Failed to get invoices: {e}")
-            raise RuntimeError(f"Failed to get invoices: {e}") from e
+            logger.error(f"Niet gelukt om de facturen op te halen: {e}")
+            raise RuntimeError(f"Niet gelukt om de facturen op te halen: {e}") from e
         
         
     def get_invoices_by_supplier(self, supplier: str):
@@ -191,8 +192,8 @@ class DatabaseManager:
             return rows
 
         except Exception as e:
-            logger.error(f"Failed to get invoices by supplier: {e}")
-            raise RuntimeError(f"Failed to get invoices by supplier: {e}") from e
+            logger.error(f"Niet gelukt om de facturen op te halen voor leverancier: {e}")
+            raise RuntimeError(f"Niet gelukt om de facturen op te halen voor leverancier: {e}") from e
         
         
     def get_dashboard_stats(self):
@@ -221,8 +222,8 @@ class DatabaseManager:
                 }
 
         except Exception as e:
-            logger.error(f"Failed to get dashboard stats: {e}")
-            raise RuntimeError(f"Failed to get dashboard stats: {e}") from e
+            logger.error(f"Niet gelukt om de dashboard statistieken op te halen: {e}")
+            raise RuntimeError(f"Niet gelukt om de dashboard statistieken op te halen: {e}") from e
         
     
     # Get the total invoice amount per supplier
@@ -245,8 +246,8 @@ class DatabaseManager:
             return rows
 
         except Exception as e:
-            logger.error(f"Failed to get supplier totals: {e}")
-            raise RuntimeError(f"Failed to get supplier totals: {e}") from e    
+            logger.error(f"Niet gelukt om de totalen per leverancier op te halen: {e}")
+            raise RuntimeError(f"Niet gelukt om de totalen per leverancier op te halen: {e}") from e    
         
     
     def get_invoices_by_status(self, status: str):
@@ -267,8 +268,8 @@ class DatabaseManager:
             return rows
 
         except Exception as e:
-            logger.error(f"Failed to get invoices by status: {e}")
-            raise RuntimeError(f"Failed to get invoices by status: {e}") from e
+            logger.error(f"Niet gelukt om de facturen op te halen op status: {e}")
+            raise RuntimeError(f"Niet gelukt om de facturen op te halen op status: {e}") from e
         
     def update_invoice_status(self, invoice_number: str, new_status: str):
         try:
@@ -283,5 +284,5 @@ class DatabaseManager:
                 self.conn.commit()
 
         except Exception as e:
-            logger.error(f"Failed to update invoice status: {e}")
-            raise RuntimeError(f"Failed to update invoice status: {e}") from e
+            logger.error(f"Niet gelukt om de status van de factuur bij te werken: {e}")
+            raise RuntimeError(f"Niet gelukt om de status van de factuur bij te werken: {e}") from e

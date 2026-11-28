@@ -33,7 +33,7 @@ class Invoice:
     
     # Metadata
     confidence: int=0   
-    booking_status: str="PENDING"
+    booking_status: str="NIEUW"
  
     # Source of the invoice data
     source_file: str=""

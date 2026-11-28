@@ -54,12 +54,12 @@ if uploaded_files:
             
             if is_valid:
                 
-                status="VALIDATED"
+                status="GOEDGEKEURD"
                 parsed_invoice.booking_status = status
                 st.success(get_status_label(status))
                 
             else:
-                status="REJECTED"
+                status="AFGEKEURD"
                 parsed_invoice.booking_status = status
                 st.error(get_status_label(status))
             

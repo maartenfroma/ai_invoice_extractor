@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import datetime
-from wsgiref import headers
 from models.invoice import Invoice
 
 from db_management.database_manager import DatabaseManager
@@ -34,7 +33,7 @@ class InvoiceValidator:
         self.invoice = invoice
         
         if not self.invoice:
-            raise ValueError("No invoice provided")
+            raise ValueError("Geen factuurgegevens verstrekt")
     
     # Validate the invoice data and return a 
     # tuple indicating validity and error messages
@@ -51,6 +50,7 @@ class InvoiceValidator:
             self._validate_vat_amount(),
             self._validate_no_duplicates()
         ]
+        # self._validate_category(),
         
         # Collect all validation errors from the individual validation methods
         validation_errors = []
@@ -74,24 +74,24 @@ class InvoiceValidator:
     
     # Validate the supplier field in the invoice
     # Returns True if the supplier field is non-empty, False otherwise
-    def _validate_supplier(self) -> bool:
+    def _validate_supplier(self) -> tuple[bool, str]:
         
         if not self.invoice.supplier.strip():
-            return False, "Supplier is empty"
+            return False, "Leverancier is leeg"
         return True, ""
     
     # Validate the invoice number field in the invoice
     # Returns True if the invoice number matches the expected pattern, False otherwise
-    def _validate_invoice_number(self) -> bool:
+    def _validate_invoice_number(self) -> tuple[bool, str]:
         
         
         if not re.match(r"^[A-Za-z0-9\-_\/]+$", self.invoice.invoice_number.strip()):
-            return False, "Invalid invoice number"
+            return False, "Ongeldig factuurnummer"
         return True, ""
 
     # Validate the invoice date field in the invoice
     # Returns True if the invoice date is in the correct format, False otherwise
-    def _validate_date(self) -> bool:
+    def _validate_date(self) -> tuple[bool, str]:
         date_formats=[
             "%Y-%m-%d",
                     "%d %b %Y",
@@ -104,38 +104,38 @@ class InvoiceValidator:
             except (ValueError, AttributeError):
                 pass
             
-        return False, "Invalid date format"
+        return False, "Ongeldig datumformaat"
     
     # Validate the totals in the invoice
     # Returns True if the sum of total_ex_vat and vat_amount matches total_inc_vat within a small tolerance, False otherwise            
-    def _validate_totals(self) -> bool:
+    def _validate_totals(self) -> tuple[bool, str]:
         calculated_total = float(self.invoice.total_ex_vat) + float(self.invoice.vat_amount)
         if not abs(calculated_total - float(self.invoice.total_inc_vat)) <= 0.01:
-            return False, "Totals do not match"
+            return False, "Totalen komen niet overeen"
         return True, ""
        
-    def _validate_confidence(self) -> bool:
+    def _validate_confidence(self) -> tuple[bool, str]:
         
         if self.invoice.confidence < 80.0:
-            return False, "Confidence below threshold"
+            return False, "Vertrouwen onder drempelwaarde"
         return True, ""
     
     
     # Validate the VAT amount in the invoice
     # Returns True if the VAT amount matches the difference between total_inc_vat and total_ex_vat within a small tolerance, False otherwise
-    def _validate_vat_amount(self) -> bool:
+    def _validate_vat_amount(self) -> tuple[bool, str]:
         
         calculated_vat = float(self.invoice.total_inc_vat) - float(self.invoice.total_ex_vat)
         
         if not abs(calculated_vat - float(self.invoice.vat_amount)) <= 0.01:
-            return False, "VAT amount does not match"
+            return False, "BTW bedrag komt niet overeen"
         return True, ""
         
     
     
     # Validate if the invoice is a duplicate in the database
     # Returns false if a duplicate is found, True otherwise
-    def _validate_no_duplicates(self) -> bool:
+    def _validate_no_duplicates(self) -> tuple[bool, str]:
         
         db_manager = self.db_manager
         
@@ -151,13 +151,13 @@ class InvoiceValidator:
         if not (self.invoice.supplier, self.invoice.invoice_number) in no_duplicates:
             return True, ""
         
-        return False, "Duplicate invoice found"
+        return False, "Dubbele factuur gevonden"
     
-    def _validate_category(self) -> bool:
+    def _validate_category(self) -> tuple[bool, str]:
         
         # Returns True if the category field is non-empty, False otherwise
         if not bool(self.invoice.category.strip()):
-            return False, "No category specified"
+            return False, "Geen categorie opgegeven"
         
         return True, ""
     
@@ -165,10 +165,10 @@ class InvoiceValidator:
         try:
             query="""
             SELECT * FROM invoices
-            WHERE booking_status = 'VALIDATED' 
+            WHERE booking_status = 'GOEDGEKEURD' 
             ORDER BY invoice_date DESC
             """
-            with self.conn.cursor() as cursor:
+            with self.db_manager.conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 
@@ -176,10 +176,10 @@ class InvoiceValidator:
             
         except Exception as e:
             logger.error(
-                f"Failed to get validated invoices: {e}"
+                f"Niet gelukt om gevalideerde facturen op te halen: {e}"
             )
 
-        raise RuntimeError(
-            f"Failed to get validated invoices: {e}"
-        ) from e
-       
+            raise RuntimeError(
+                f"Niet gelukt om gevalideerde facturen op te halen: {e}"
+                    ) from e
+        

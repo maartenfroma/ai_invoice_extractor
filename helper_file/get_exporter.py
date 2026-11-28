@@ -30,10 +30,11 @@ def get_exporter(exporter_type: str, df: pd.DataFrame):
         exporter_class=exporters.get(exporter_type.lower(), df)
         
         if exporter_class is None:
-            raise ValueError(f"Unknown exporter type: {exporter_type}")
+            raise ValueError(f"Onbekende exporteur type: {exporter_type}")
     else:
-        raise ValueError(f"Unknown exporter type: {exporter_type}")
+        raise ValueError(f"Onbekende exporteur type: {exporter_type}")
         
     #  Return an instance of the exporter class initialized with the DataFrame.
+    
     return exporter_class(df)
     

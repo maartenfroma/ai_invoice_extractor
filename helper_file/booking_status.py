@@ -1,10 +1,10 @@
 # utils/status_helper.py
 
-STATUS_NEW = "NEW"
-STATUS_VALIDATED = "VALIDATED"
-STATUS_REJECTED = "REJECTED"
-STATUS_BOOKED = "BOOKED"
-STATUS_PAID = "PAID"
+STATUS_NEW = "NIEUW"
+STATUS_VALIDATED = "GOEDGEKEURD"
+STATUS_REJECTED = "AFGEKEURD"
+STATUS_BOOKED = "GEBOEKT"
+STATUS_PAID = "BETAALD"
 
 
 def get_status_label(status: str) -> str:
@@ -13,11 +13,11 @@ def get_status_label(status: str) -> str:
     """
 
     labels = {
-        STATUS_NEW: "🔵 NEW",
-        STATUS_VALIDATED: "🟢 VALIDATED",
-        STATUS_REJECTED: "🔴 REJECTED",
-        STATUS_BOOKED: "🟠 BOOKED",
-        STATUS_PAID: "✅ PAID"
+        STATUS_NEW: "🔵 NIEUW",
+        STATUS_VALIDATED: "🟢 GOEDGEKEURD",
+        STATUS_REJECTED: "🔴 AFGEKEURD",
+        STATUS_BOOKED: "🟠 GEBOEKT",
+        STATUS_PAID: "✅ BETAALD"
     }
 
     return labels.get(status, f"❓ {status}")
@@ -29,14 +29,14 @@ def get_status_color(status: str) -> str:
     """
 
     colors = {
-        STATUS_NEW: "blue",
-        STATUS_VALIDATED: "green",
-        STATUS_REJECTED: "red",
-        STATUS_BOOKED: "orange",
-        STATUS_PAID: "darkgreen"
+        STATUS_NEW: "blauw",
+        STATUS_VALIDATED: "groen",
+        STATUS_REJECTED: "rood",
+        STATUS_BOOKED: "oranje",
+        STATUS_PAID: "donkergroen"
     }
 
-    return colors.get(status, "gray")
+    return colors.get(status, "grijs")
 
 
 def is_editable(status: str) -> bool:

@@ -8,8 +8,8 @@ db_manager = DatabaseManager()
 
 st.title("Controle Facturen")
 
-status=st.selectbox("Selecteer de status van de facturen", ["NEW","VALIDATED", "REJECTED",
-                                                            "BOOKED", "PAID"], format_func=get_status_label)
+status=st.selectbox("Selecteer de status van de facturen", ["NIEUW","GOEDGEKEURD", "AFGEKEURD",
+                                                            "GEBOEKT", "BETAALD"], format_func=get_status_label)
 
 # Fetch and display invoices based on the selected status
 if status:
@@ -45,12 +45,12 @@ if status:
         
         st.metric("Confidence", invoice_number["confidence"])
         
-        if status == "REJECTED":
+        if status == "AFGEKEURD":
             
          if st.button("✅ Goedkeuren"):
             
                 
-            db_manager.update_invoice_status(invoice_number["id"], "VALIDATED")
+            db_manager.update_invoice_status(invoice_number["invoice_number"], "GOEDGEKEURD")
             st.success(f"Factuur {select_invoice} is goedgekeurd.")
             
             st.rerun()

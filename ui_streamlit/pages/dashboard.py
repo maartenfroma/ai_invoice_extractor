@@ -11,7 +11,7 @@ try:
     db_manager.create_invoice_table()
     
 except Exception as e:
-    st.error(f"Failed to create invoice table: {e}")
+    st.error(f"Kon geen factuurtabel aanmaken: {e}")
 
 # Set up the dashboard page title and layout
 st.title("📊 Dashboard")

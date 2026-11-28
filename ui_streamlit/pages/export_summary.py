@@ -11,7 +11,7 @@ st.title("Export Facturen")
 
 st.info("Deze pagina toont een overzicht van de te exporteren facturen.")
 
-validated_invoices = db_manager.get_invoices_by_status("VALIDATED") 
+validated_invoices = db_manager.get_invoices_by_status("GOEDGEKEURD") 
 
 if validated_invoices:
     df=pd.DataFrame(validated_invoices)
