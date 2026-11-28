@@ -18,7 +18,7 @@ services:
     image: factuuur_ai_piloot
     container_name: factuuur_ai_piloot
     ports:
-      - "8501:8501"
+      - "8503:8501"
     restart: always
     environment:
       - PYTHONUNBUFFERED=1
